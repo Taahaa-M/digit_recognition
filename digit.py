@@ -1,0 +1,2 @@
+class Digit():
+    pass
