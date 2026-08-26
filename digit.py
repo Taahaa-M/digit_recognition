@@ -4,19 +4,26 @@ import struct
 
 
 class Digits():
+    DIGITS_MAGIC_NO = 2051
+    LABELS_MAGIC_NO = 2049
     def __init__(self, digits_file, digit_labels_file):
         self._read_digits(digits_file)
         self._read_digit_labels(digit_labels_file)
 
         try:
-            assert(self._label_count == self._count == self._rows * self._cols)
+            assert(self._label_count == self._count)
         except Exception as e:
             print(e, file=sys.stderr)
+            print(f"lbl_count={self._label_count}\n"
+                + f"img_count={self._count}\n",
+                file=sys.stderr
+            )
             print(
                 f"Using this Digits object ({self}) is not advised.\n" +
                 "Behaviour will be undefined.\n",
                 file=sys.stderr
             )
+
 
     def _read_digits(self, digits_file):
         with open(digits_file, "rb") as f:
@@ -26,7 +33,7 @@ class Digits():
             magic, count, rows, cols = struct.unpack(">IIII", header)
 
             try:
-                assert(magic == 2051)
+                assert(magic == Digits.DIGITS_MAGIC_NO)
             except:
                 print(f"{digits_file} is an invalid digits file. Use the MNIST dataset", file=sys.stderr)
                 return
@@ -52,7 +59,7 @@ class Digits():
             magic, label_count = struct.unpack(">II", header)
 
             try:
-                assert(magic==2051)
+                assert(magic==Digits.LABELS_MAGIC_NO)
             except:
                 print(f"{digit_labels_file} is an invalid labels file. Use the MNIST dataset", file=sys.stderr)
                 return
