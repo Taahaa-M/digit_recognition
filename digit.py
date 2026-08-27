@@ -27,9 +27,8 @@ class Digits():
 
     def _read_digits(self, digits_file):
         with open(digits_file, "rb") as f:
-            header = f.read(16)
-
             # 4 big-endian uint32
+            header = f.read(int(4*32/8))
             magic, count, rows, cols = struct.unpack(">IIII", header)
 
             try:
@@ -42,7 +41,7 @@ class Digits():
             self._rows = rows
             self._cols = cols
 
-            self._digits_list = [0 for _ in range(count)]  # everything is a pointer type, right?
+            self._digits_list = [None] * count  # everything is a pointer type, right?
             for i in range(count):
                 self._digits_list[i] = np.fromfile(
                     f,
@@ -59,7 +58,7 @@ class Digits():
             magic, label_count = struct.unpack(">II", header)
 
             try:
-                assert(magic==Digits.LABELS_MAGIC_NO)
+                assert(magic == Digits.LABELS_MAGIC_NO)
             except:
                 print(f"{digit_labels_file} is an invalid labels file. Use the MNIST dataset", file=sys.stderr)
                 return
@@ -82,3 +81,7 @@ class Digits():
 
     def get_digit_labels_list(self):
         return self._digit_labels_list
+
+
+    def get_image_size(self):
+        return self._rows * self._cols
