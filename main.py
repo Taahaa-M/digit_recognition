@@ -20,8 +20,9 @@ def main():
         neuron_count_list=[digits.get_image_size(), 128, 64, 10]
     )
 
+    epoch_count = 100
     trainer = Trainer(model, digit_vectors, digit_label_vectors)
-    trainer.train_model()
+    trainer.train_model(epoch_count)
 
 
 if __name__ == "__main__":

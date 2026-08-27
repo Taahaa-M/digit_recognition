@@ -59,21 +59,37 @@ class Trainer():
         return 1.0 / (2.0 + np.exp(x) + np.exp(-x))
 
 
-    def train_model(self):
-        # for i in range(len(self._input_batches) - 1):
-        i = 0
-        output = self._model.run_model(self._input_batches[i], Trainer.sigmoid)
+    def train_model(self, epoch_count):
+        epoch_count_digits = int(np.floor(np.log10(epoch_count) + 1))
 
-        cost = Trainer.sqr_diff_batch_cost(
-            output,
-            self._exp_output_batches[i]
+        # for i in range(1, epoch_count + 1):
+        # for j in range(len(self._input_batches) - 1):
+        i = 1
+        j = 0
+        output = self._model.run_model(self._input_batches[j], Trainer.sigmoid)
+        cost_func = Trainer.sqr_diff_batch_cost
+
+        self._backpropagate(
+            output, self._exp_output_batches[j],
+            Trainer.sqr_diff_deriv_batch_cost,
+            Trainer.sigmoid_deriv
         )
 
-        cost_deriv = Trainer.sqr_diff_deriv_batch_cost(
-            output,
-            self._exp_output_batches[i]
-        )
+        cost = cost_func(output, self._exp_output_batches[j])
+        print(f"Epoch {i:0(epoch_count_digits)d}: cost = {cost:.6f}")
 
-        print(cost)
-        print()
-        print(cost_deriv)
+
+    def _backpropagate(self,
+        output_batch, expected_output_batch,
+        cost_deriv_func,
+        norm_deriv_func,
+        learning_rate=1.0):
+        norm_lyr_outp = self._model.norm_lyr_output
+        pre_norm_lyr_outp = self._model.pre_norm_lyr_output
+        lyr_count = self._model.layer_count
+        product = cost_deriv_func(output_batch, expected_output_batch)
+
+        for i in range(lyr_count - 1, 0, -1):
+            product *= norm_deriv_func(output_batch)
+            bias_deriv = product
+            wght_deriv = product * pre_norm_lyr_outp[i]
