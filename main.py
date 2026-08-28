@@ -1,28 +1,37 @@
+import pygame as pg
+from gui import SCREEN_DIMENSIONS, BLACK, FPS, DefaultButton, DefaultDrawingBoard
 from model import Model
-from digit import Digits
-from trainer import Trainer
 
-DIGITS_FILE_NAME = "archive/train-images.idx3-ubyte"
-DIGIT_LABELS_FILE_NAME = "archive/train-labels.idx1-ubyte"
+model = Model.load_model("mnist_sigmoid_model.npz")
+
+screen = pg.display
+screen.set_caption("Digit Recognition")
+surface = screen.set_mode(SCREEN_DIMENSIONS)
+clock = pg.time.Clock()
+
+drawingBoard = DefaultDrawingBoard(surface)
+button = DefaultButton(surface, "Guess", guess)
 
 def main():
-    digits = Digits(
-        DIGITS_FILE_NAME,
-        DIGIT_LABELS_FILE_NAME
-    )
+    running = True
+    while running == True:
+        events = pg.event.get()
+        for event in events:
+            if event.type == pg.QUIT:
+                running = False
 
-    digit_vectors = digits.get_digits_list()
-    digit_label_vectors = digits.get_digit_labels_list()
+        surface.fill(BLACK)
+        drawingBoard.updateDraw()
+        button.update()
 
-    model = Model(
-        input_size=digits.get_image_size(),
-        output_size=10,
-        neuron_count_list=[digits.get_image_size(), 128, 64, 10]
-    )
+        screen.update()
+        clock.tick(FPS)
 
-    epoch_count = 100
-    trainer = Trainer(model, digit_vectors, digit_label_vectors)
-    trainer.train_model(epoch_count)
+    pg.quit()
+
+
+def guess():
+    print("Hello")
 
 
 if __name__ == "__main__":

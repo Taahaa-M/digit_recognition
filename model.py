@@ -39,6 +39,44 @@ class Model():
             ])
 
 
+    @classmethod
+    def load_model(cls, filename):
+        layers = []
+
+        with np.load(filename) as data:
+            i = 0
+
+            while f"W{i}" in data:
+                try:
+                    assert(f"b{i}" in data)
+                except:
+                    print(f"No matching bias vectors for layer {i+1}", sys.stderr)
+
+                weights = data[f"W{i}"].copy()
+                bias = data[f"b{i}"].copy()
+
+                layers.append([weights, bias])
+
+        model = cls.__new__(cls)
+        model.layers = layers
+
+        model.layer_count = len(model.layers)
+        model.pre_norm_lyr_output = [None] * model.layer_count
+        model.norm_lyr_output = [None] * model.layer_count
+
+        return model
+
+
+    def save_model(self, filename):  # need to define a model file structure
+        data = {}
+
+        for i, (weights, bias) in enumerate(self.layers):
+            data[f"W{i}"] = weights
+            data[f"b{i}"] = bias
+
+        np.savez(filename, **data)
+
+
     def run_model(self, input, norm_func):
         for i in range(self.layer_count):
             self.pre_norm_lyr_output[i] = self.layers[i][Model.WGHT_MATRIX] @ input \
@@ -47,6 +85,3 @@ class Model():
 
         return input
 
-
-    def save_model(self):  # need to define a model file structure
-        pass

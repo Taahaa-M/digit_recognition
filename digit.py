@@ -47,7 +47,8 @@ class Digits():
                     f,
                     dtype=np.uint8,
                     count=(rows * cols)
-                ).astype(np.float64) / float(2**8)
+                ).astype(np.float64).reshape(-1, 1) / float(2**8 - 1)
+                # for column vectors      ^^^^
 
 
     def _read_digit_labels(self, digit_labels_file):
@@ -66,12 +67,12 @@ class Digits():
             self._label_count = label_count
 
             self._digit_labels_list = list(
-                np.zeros(shape=(10,), dtype=np.float64)
+                np.zeros(shape=(10, 1), dtype=np.float64)
                 for _ in range(label_count)
             )
             for i in range(label_count):
                 header = f.read(1)
-                self._digit_labels_list[i][struct.unpack("B", header)] = 1.0
+                self._digit_labels_list[i][struct.unpack("B", header)][0] = 1.0
                 # label '0' will be the first in the array at idx 0
 
 
